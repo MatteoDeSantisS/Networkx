@@ -70,7 +70,7 @@ def greedy_path(G, source, target, heuristic=None, weight='weight'):
     # attempting to compare the nodes themselves. The hash breaks ties in the
     # priority and is guaranteed unique for all nodes in the graph.
     c = count()
-    queue = [(0, next(c), source, None)]
+    queue = [(0, next(c), source, 0, None)]
 
     # Maps enqueued nodes to distance of discovered paths and the
     # computed heuristics to target. We avoid computing the heuristics
@@ -79,9 +79,9 @@ def greedy_path(G, source, target, heuristic=None, weight='weight'):
     # Maps explored nodes to parent closest to the source.
     explored = {}
 
-    while queue:
+     while queue:
         # Pop the smallest item from queue.
-        _, __, curnode, parent = pop(queue)
+        _, __, curnode, dist, parent = pop(queue)
 
         if curnode == target:
             path = [curnode]
@@ -97,18 +97,17 @@ def greedy_path(G, source, target, heuristic=None, weight='weight'):
             if explored[curnode] is None:
                 continue
 
-
         explored[curnode] = parent
 
-        for neighbor in G[curnode].items():
+        for neighbor, w in G[curnode].items():
+            ncost = dist + w.get(weight, 1)
             if neighbor in enqueued:
-                continue
+                qcost, h = enqueued[neighbor]
+                    continue
             else:
                 h = heuristic(neighbor, target)
-            enqueued[neighbor] = h
-            push(queue, (h, next(c),neighbor,curnode))
+            enqueued[neighbor] = ncost, h
+            push(queue, (h, next(c), neighbor, ncost, curnode))
 
     raise nx.NetworkXNoPath("Node %s not reachable from %s" % (target, source))
-
-
 
